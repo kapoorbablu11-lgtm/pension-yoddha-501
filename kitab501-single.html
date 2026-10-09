@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>पेंशन योद्धाओं की आवाज़ — किताब + कैलकुलेटर</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+body{font-family:'Noto Sans Devanagari',sans-serif;background:#162a5c;color:#faf4e3;margin:0}
+header{text-align:center;padding:12px;background:#101f45;border-bottom:3px solid #d4a843}
+h1{color:#d4a843;font-size:1.4rem;margin:0}p.sub{font-size:.8rem;color:#cfd8ee;margin:4px 0 0}
+.tabs{display:flex;gap:8px;justify-content:center;padding:10px;background:#0d1c3f}
+.tabs button{background:#22376b;color:#faf4e3;border:2px solid #d4a843;border-radius:8px;padding:10px 22px;font-size:1.05rem;cursor:pointer;font-family:inherit}
+.tabs button.on{background:#9c1e26}
+.sec{display:none}.sec.on{display:block}
+#book{background:#0a1734;border:4px solid #d4a843;border-radius:10px;height:75vh;display:flex;align-items:center;justify-content:center;margin:12px;overflow:hidden}
+#book canvas{max-height:100%;max-width:98%;box-shadow:0 0 12px #000}
+#ctrl{display:flex;justify-content:center;gap:14px;padding:10px;align-items:center;flex-wrap:wrap}
+#ctrl button{background:#9c1e26;color:#fff;border:2px solid #d4a843;border-radius:8px;padding:8px 22px;font-size:1rem;cursor:pointer;font-family:inherit}
+#pgno{color:#d4a843;font-weight:bold}
+iframe{width:100%;height:78vh;border:none;background:#fff}
+.note{max-width:760px;margin:auto;padding:10px;font-size:.85rem;color:#cfd8ee;text-align:center}
+</style></head><body>
+<header><h1>॥ पेंशन योद्धाओं की आवाज़ ॥</h1>
+<p class="sub">रिट याचिकाएँ — विभिन्न उच्च न्यायालयों के लिए (501 पेज, हिंदी) · संकलन : बी. एन. अग्रवाल जी, NCPA · हिंदी रूपांतरण : अतुल कपूर, HAL लखनऊ</p></header>
+<div class="tabs">
+<button class="on" onclick="show('b',this)">📖 किताब (फ्लिपबुक)</button>
+
+</div>
+<div id="b" class="sec on">
+<div id="book"><div style="color:#8fa;padding:20px">किताब लोड हो रही है…</div></div>
+<div id="ctrl"><button onclick="flip(-2)">⬅ पिछला</button><span id="pgno"></span><button onclick="flip(2)">अगला ➡</button>
+<input type="number" id="jump" style="width:80px;background:#fff;border:2px solid #d4a843;border-radius:6px;padding:6px" placeholder="पेज">
+<button onclick="go()">जाएँ</button></div>
+<div class="note">पूरी किताब डाउनलोड करने के लिए : <a style="color:#d4a843" href="pension-book-hindi.pdf" download>⬇ यहाँ क्लिक करें</a></div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pdf=null,cur=1,total=0;const book=document.getElementById('book');
+async function load(){try{pdf=await pdfjsLib.getDocument('pension-book-hindi.pdf').promise;total=pdf.numPages;render();}
+catch(e){book.innerHTML='<div style="color:#f88;padding:20px">PDF नहीं मिली — "pension-book-hindi.pdf" इसी रेपो में अपलोड करें।</div>'}}
+async function render(){book.innerHTML='';
+for(let i=cur;i<cur+2&&i<=total;i++){const pg=await pdf.getPage(i);
+const vp=pg.getViewport({scale:1.15});const c=document.createElement('canvas');
+c.width=vp.width;c.height=vp.height;
+await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;book.appendChild(c);}
+document.getElementById('pgno').textContent=cur+' - '+Math.min(cur+1,total)+' / '+total;}
+function flip(d){cur=Math.max(1,Math.min(total-(total%2?0:1),cur+d));render();}
+function go(){cur=Math.max(1,Math.min(total,parseInt(document.getElementById('jump').value)||1));render();}
+function show(id,b){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+document.getElementById(id).classList.add('on');
+document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
+load();
+</script></body></html>
